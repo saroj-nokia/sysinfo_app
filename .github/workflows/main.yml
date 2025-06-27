@@ -1,0 +1,48 @@
+# Name of the workflow as it appears in GitHub Actions UI
+name: Android CI - Build Debug APK
+
+# Define when this workflow should run
+on:
+  # Triggers the workflow on pushes to the 'main' branch
+  push:
+    branches:
+      - main
+  # Allows you to run this workflow manually from the Actions tab in GitHub
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs.
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Checkout Repository
+      # Uses the official action to check out your repository code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      # Uses the official action to set up a Java Development Kit environment
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin' # Recommended distribution for OpenJDK
+        java-version: '17'      # Specify the Java version required by your Android project
+
+    - name: Grant execute permission for gradlew
+      # Ensure the Gradle wrapper script is executable
+      run: chmod +x gradlew
+
+    - name: Build Debug APK
+      # Executes the Gradle command to build the debug APK
+      # This assumes your Android project has a 'gradlew' wrapper in the root.
+      run: ./gradlew assembleDebug
+
+    - name: Upload Debug APK as Artifact
+      # Uses the official action to upload the generated APK as a workflow artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk # The name of the artifact
+        path: app/build/outputs/apk/debug/app-debug.apk # The path to the generated APK file
+        # Optional: Set a retention period for the artifact (e.g., 5 days)
+        retention-days: 5
